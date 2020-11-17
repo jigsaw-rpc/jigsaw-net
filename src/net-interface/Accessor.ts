@@ -25,7 +25,7 @@ class Accessor{
         return this.from_domain;
     }
     getReplyInfo(){
-        assert(this.can_reply);
+        assert(this.can_reply,"this Accessor can not reply now");
         return this.reply_info as RPCSpi.network.AddressInfo;
     }
 

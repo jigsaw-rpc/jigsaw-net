@@ -12,16 +12,23 @@ class Connection{
     private domain_name? : string;
     private loop : boolean = false;
     private closing_defer = new Defer<void>();
-    
-    constructor(connector: RPCSpi.jigsaw.IJigsaw,to_regserver:string,jgname:string){
+    private to_domain :string;
+    constructor(connector: RPCSpi.jigsaw.IJigsaw,to_domain:string,to_regserver:string,jgname:string){
     
         this.invoker = RPC.GetJigsaw({registry:to_regserver});
         this.connector = connector;
         this.jgname = jgname;
+        this.to_domain = to_domain;
         this.start();
     }
     setDomainName(domain_name : string){
         this.domain_name = domain_name;
+    }
+    getTargetDomainName(){
+        return this.to_domain;
+    }
+    getInvoker(){
+        return this.invoker;
     }
 
     async start(){

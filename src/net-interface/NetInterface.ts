@@ -70,7 +70,7 @@ class NetInterface{
         if(this.conn)
             throw new Error(`already connect to ${to_domain}/${to_name}`);
 
-        this.conn = new Connection(this.jigsaw,to_regserver,to_name);
+        this.conn = new Connection(this.jigsaw,to_domain,to_regserver,to_name);
         this.conn.setDomainName(this.config_client.getConfig().netname);
     }
     async start_loop(){
@@ -85,7 +85,12 @@ class NetInterface{
                 await this.config_client.reportInterfaceInfo({
                     intf_name:this.name,
                     from_domain:this.accessor.getCanReply() ? this.accessor.getFromDomain() : ""
-                });    
+                });
+                if(this.conn)
+                    await this.config_client.reportInterfaceInfo({
+                        intf_name:this.name,
+                        from_domain:this.conn.getTargetDomainName()
+                    });
                 
             }catch(err){
 
@@ -134,8 +139,13 @@ class NetInterface{
             let ret = await this.processOutside2Inside(path,data);
             return ret;
         }
+        if(this.conn && this.conn.getTargetDomainName() == path.domain){
+            
+            return await this.conn.getInvoker().send(`${path.regpath}:${path.method}`,{});
+        }
 
         if(data.from_domain == config.netname){
+
             return await this.processInside2Outside(data);
         }
 

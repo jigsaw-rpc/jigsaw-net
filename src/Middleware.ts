@@ -38,7 +38,7 @@ class Middleware{
             let config = this.config_client.getConfig();
             let routes = this.config_client.getConfigRoutes();
             
-            
+            console.log(routes);            
             for(let route of routes){
                 let parser = new RouteParser(path.domain,route);
                 if(parser.isMatched()){
