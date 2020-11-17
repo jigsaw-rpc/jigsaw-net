@@ -50,7 +50,7 @@ class NetInterface{
         this.name = this.jigsaw.getName();
 
         this.jigsaw.pre(this.middle_ware.handle());
-        this.jigsaw.port("data",this.onRouteRequest.bind(this));
+        this.jigsaw.port("route",this.onRouteRequest.bind(this));
         this.jigsaw.port("connect",this.onConnect.bind(this));
         this.jigsaw.port("ping",async()=>(this.config_client.getConfig()));
 
@@ -141,7 +141,6 @@ class NetInterface{
         }
         
         if(!this.conn && this.accessor.getCanReply()){
-            console.log("1");
             if(data.from_domain == this.accessor.getFromDomain()){
                 return await this.continueRoute(data);
             }
@@ -163,13 +162,13 @@ class NetInterface{
     }
     private async sendToAccessor(data:any){
 
-        let result = await this.jigsaw.call(new RPCSpi.network.Path("path","data"),new AddrRoute(
+        let result = await this.jigsaw.call(new RPCSpi.network.Path("path","route"),new AddrRoute(
             this.accessor.getReplyInfo()
         ),data);
         return result;
     }
     private async sendToInside(path:DomainPath,data:any){
-        let result = await this.jigsaw.send(`${path.regpath}:${path.method}`,data);   
+        let result = await this.jigsaw.send(`${path.regpath}:${path.method}`,this.handlePayload(data.payload));   
         return result;
     }
     private async sendToConnection(data:any){
@@ -178,10 +177,19 @@ class NetInterface{
         if(!this.conn)
             throw new Error("not this connection");
 
-        return await this.conn.getInvoker().send(`${this.conn.getTargetInterfaceName()}:data`,data);
+        return await this.conn.getInvoker().send(`${this.conn.getTargetInterfaceName()}:route`,data);
     }
     private async continueRoute(data:any){
         return await this.jigsaw.send(data.dst,{});
+    }
+    private handlePayload(payload:any){
+        let ret : Buffer | Object;
+        if(payload.isBuffer){
+            ret = Buffer.from(payload,"base64")
+        }else{
+            ret = payload;
+        }
+        return ret;
     }
 
     private async onConnect(data:any,ctx:any){
