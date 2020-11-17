@@ -168,7 +168,7 @@ class NetInterface{
         return result;
     }
     private async sendToInside(path:DomainPath,data:any){
-        let result = await this.jigsaw.send(`${path.regpath}:${path.method}`,this.handlePayload(data.payload));   
+        let result = await this.jigsaw.send(`${path.regpath}:${path.method}`,this.handlePayload(data));   
         return result;
     }
     private async sendToConnection(data:any){
@@ -182,12 +182,12 @@ class NetInterface{
     private async continueRoute(data:any){
         return await this.jigsaw.send(data.dst,{});
     }
-    private handlePayload(payload:any){
+    private handlePayload(data:any){
         let ret : Buffer | Object;
-        if(payload.isBuffer){
-            ret = Buffer.from(payload,"base64")
+        if(data.isBuffer){
+            ret = Buffer.from(data.payload,"base64")
         }else{
-            ret = payload;
+            ret = data.payload;
         }
         return ret;
     }
