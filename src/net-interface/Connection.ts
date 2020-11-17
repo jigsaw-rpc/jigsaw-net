@@ -24,6 +24,9 @@ class Connection{
     setDomainName(domain_name : string){
         this.domain_name = domain_name;
     }
+    getTargetInterfaceName(){
+        return this.jgname;
+    }
     getTargetDomainName(){
         return this.to_domain;
     }
