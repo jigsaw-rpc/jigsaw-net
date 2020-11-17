@@ -140,7 +140,6 @@ class NetInterface{
             return ret;
         }
         if(this.conn && this.conn.getTargetDomainName() == path.domain){
-            console.log(`${this.conn.getTargetInterfaceName()}:data`,data)
             return await this.conn.getInvoker().send(`${this.conn.getTargetInterfaceName()}:data`,data);
         }
 
