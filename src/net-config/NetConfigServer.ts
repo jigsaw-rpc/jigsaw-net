@@ -55,7 +55,7 @@ class NetConfigServer{
         });
 
         this.jigsaw.port("report",async (data:any)=>{
-            let intf = this.getInterface(data.intf_name);
+            let intf = this.getInterface(data.from_domain,data.intf_name);
             intf.updateInfo(data.from_domain);
             this.config.link_routes = this.getLinkRoutes();
 
@@ -65,12 +65,13 @@ class NetConfigServer{
         this.start_loop();
     }
     
-    private getInterface(intf_name:string){
-        if(!this.interfaces.has(intf_name)){
-            this.interfaces.set(intf_name,new InterfaceInfo(intf_name));
+    private getInterface(from_domain:string,intf_name:string){
+        let key = `${from_domain}-${intf_name}`
+        if(!this.interfaces.has(key)){
+            this.interfaces.set(key,new InterfaceInfo(intf_name));
         }
 
-        return this.interfaces.get(intf_name) as InterfaceInfo;
+        return this.interfaces.get(key) as InterfaceInfo;
     }
     private getLinkRoutes(): Array<Array<string>>{
         let routes : Array<Array<string>>=[];
