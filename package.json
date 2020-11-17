@@ -2,8 +2,8 @@
   "name": "jigsaw-net",
   "version": "0.0.1-dev1",
   "description": "jigsaw-net is a set of components make jigsaws intercommunicating",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "main": "dist/api/index.js",
+  "typings": "dist/api/index.d.ts",
   "scripts": {
     "test": "mocha",
     "build": "tsc",
