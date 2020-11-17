@@ -136,35 +136,52 @@ class NetInterface{
         let path = DomainPath.parse(data.dst);
         let config = this.getConfig();
         if(path.domain == config.netname){
-            let ret = await this.processOutside2Inside(path,data);
+            let ret = await this.sendToInside(path,data);
             return ret;
         }
-        if(this.conn && this.conn.getTargetDomainName() == path.domain){
-            return await this.conn.getInvoker().send(`${this.conn.getTargetInterfaceName()}:data`,data);
+        
+        if(!this.conn && this.accessor.getCanReply()){
+            console.log("1");
+            if(data.from_domain == this.accessor.getFromDomain()){
+                return await this.continueRoute(data);
+            }
+
+            return await this.sendToAccessor(data);
         }
 
-        if(data.from_domain == config.netname){
+        if(this.conn && !this.accessor.getCanReply()){
+            if(data.from_domain == this.conn.getTargetDomainName()){
+                return await this.continueRoute(data);
+            }
 
-            return await this.processInside2Outside(data);
+            return await this.sendToConnection(data);
         }
-
 
         /* CAN NOT RECOGNIZE THIS PACKET, SEND TO OTHERS */
 
-        return await this.jigsaw.send(data.dst,{});
 
     }
-    private async processInside2Outside(data:any){
+    private async sendToAccessor(data:any){
 
         let result = await this.jigsaw.call(new RPCSpi.network.Path("path","data"),new AddrRoute(
             this.accessor.getReplyInfo()
         ),data);
         return result;
-
     }
-    private async processOutside2Inside(path:DomainPath,data:any){
+    private async sendToInside(path:DomainPath,data:any){
         let result = await this.jigsaw.send(`${path.regpath}:${path.method}`,data);   
         return result;
+    }
+    private async sendToConnection(data:any){
+        //console.log(!!this.conn,data);
+
+        if(!this.conn)
+            throw new Error("not this connection");
+
+        return await this.conn.getInvoker().send(`${this.conn.getTargetInterfaceName()}:data`,data);
+    }
+    private async continueRoute(data:any){
+        return await this.jigsaw.send(data.dst,{});
     }
 
     private async onConnect(data:any,ctx:any){
