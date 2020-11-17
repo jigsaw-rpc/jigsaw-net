@@ -49,7 +49,7 @@ class NetConfigClient{
                 //console.log(err);
             }
 
-            await sleep(100);
+            await sleep(1000);
         }
         this.setRef(-1);
     }

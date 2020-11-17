@@ -46,7 +46,7 @@ class Connection{
             }catch(err){
 //                console.log(err);
             }
-            await sleep(100);
+            await sleep(5000);
         }
         this.closing_defer.resolve();
     }

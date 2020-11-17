@@ -95,7 +95,7 @@ class NetInterface{
             }catch(err){
 
             }
-            await sleep(1000);
+            await sleep(3000);
         }
 
         this.setRef(-1);
@@ -180,7 +180,8 @@ class NetInterface{
         return await this.conn.getInvoker().send(`${this.conn.getTargetInterfaceName()}:route`,data);
     }
     private async continueRoute(data:any){
-        return await this.jigsaw.send(data.dst,{});
+        let payload = this.handlePayload(data);
+        return await this.jigsaw.send(data.dst,payload);
     }
     private handlePayload(data:any){
         let ret : Buffer | Object;
