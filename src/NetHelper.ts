@@ -23,12 +23,12 @@ class NetHelper{
     getConfigServer(){
         return this.server;
     }
-    getNewInterface(name:string,to_registry?:string,to_domain?:string,to_name?:string){
+    getNewInterface(name:string,entry:string,to_registry?:string,to_domain?:string,to_name?:string){
         let default_connect_to : any = undefined;
         if(to_registry && to_domain && to_name)
             default_connect_to = {registry:to_registry,domain:to_domain,name:to_name};
 
-        let intf = new NetInterface({name,registry:this.registry},default_connect_to);
+        let intf = new NetInterface({name,registry:this.registry,entry},default_connect_to);
         this.interfaces.push(intf);
         return intf;
     }

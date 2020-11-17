@@ -140,7 +140,6 @@ class NetInterface{
             return ret;
         }
         if(this.conn && this.conn.getTargetDomainName() == path.domain){
-            
             return await this.conn.getInvoker().send(`${path.regpath}:${path.method}`,{});
         }
 
