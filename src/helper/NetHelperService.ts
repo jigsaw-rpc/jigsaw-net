@@ -36,11 +36,35 @@ class NetHelperService{
         return storage.getFlattedNodes();
     }
     listRegistryNodes(){
+        let treeobj : any = {};
+
         let nodes = this.getRegistryNodes();
-        return nodes;
+        for(let node of nodes){
+            let nodenames = node.key.split(".");
+
+            if(node.type == 0)continue;
+            let curr_obj = treeobj;
+            for(let name of nodenames){
+
+                if(!curr_obj[name])
+                    curr_obj[name] =  {};
+                curr_obj = curr_obj[name];
+            }
+
+        }
+
+        let strs :Array<string> = [];
+        let map=(obj:any,prefix:string)=>{
+            for(let i in obj){
+                strs.push(prefix+" "+i);
+                map(obj[i],prefix + "--");
+            }
+        }
+        map(treeobj,"|--");
+        
+        return strs.join("\n");
     }
     getInterfacesInfo(){
-        let handle_intfs =  this.config_server.getInterfaces();
         
         let ret : Array<IntfInfo> = [];
         let interfaces = this.interface_manager.getInterfaces();
@@ -49,14 +73,11 @@ class NetHelperService{
             let name = net_intf.getName();
             let direction = net_intf.getDirection();
             let obj = {intf_name:name,from_domain:"",to_domain:"",type:direction};
-            if(handle_intfs.has(name)){
 
                 if(direction == Direction.IN){
                     obj.from_domain = net_intf.getAccessor().getFromDomain();
                 }else if(direction == Direction.OUT)
                     obj.to_domain = net_intf.getConnection().getTargetDomainName();
-
-            }
 
             ret.push(obj);
         })
@@ -65,16 +86,17 @@ class NetHelperService{
     }
     listInterfacesInfo() : string{
         let intfs = this.getInterfacesInfo();
+
         let ret:Array<string> = [];
         intfs.forEach((v)=>{
             let part_name = v.intf_name;
 
             if(v.type == Direction.IN)
-                ret.push(`<${part_name}> <- [${v.from_domain.padEnd(6)}]`);
+                ret.push(`<${part_name}> <- [ ${v.from_domain.padEnd(6)} ]`);
             else if(v.type == Direction.OUT)
-                ret.push(`<${part_name}> -> [${v.to_domain.padEnd(6)}]`);
+                ret.push(`<${part_name}> -> [ ${v.to_domain.padEnd(6)} ]`);
             else{
-                ret.push(`<${part_name}> ? [${"".padEnd(6)}]`);
+                ret.push(`<${part_name}> ?  [ ${"".padEnd(6)} ]`);
             }
 
         });

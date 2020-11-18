@@ -109,10 +109,12 @@ class NetInterface{
         while(this.loop){
             try{
 
-                await this.config_client.reportInterfaceInfo({
-                    intf_name:this.name,
-                    from_domain:this.accessor.getCanReply() ? this.accessor.getFromDomain() : ""
-                });
+                if(this.accessor.getCanReply()){
+                    await this.config_client.reportInterfaceInfo({
+                        intf_name:this.name,
+                        from_domain:this.accessor.getFromDomain()
+                    });    
+                }
                 if(this.conn)
                     await this.config_client.reportInterfaceInfo({
                         intf_name:this.name,
@@ -126,7 +128,6 @@ class NetInterface{
         }
 
         this.setRef(-1);
-
     }
     private setRef(offset:number){
         this.ref += offset;

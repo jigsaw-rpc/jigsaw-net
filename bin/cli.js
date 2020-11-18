@@ -3,13 +3,16 @@ const fs = require("fs");
 const pm2 = require("pm2");
 const assert  = require("assert");
 const path = require("path");
+const {RPC} = require("jigsaw-rpc");
 
 const cli = meow(`
     Usage:
-        jgnet <start|stop|init|list|ls> <args>
+        jgnet <start|stop|init|listintf|list|ls> <args>
 
         jgnet init
         jgnet list
+        jgnet listnodes jigsaw://127.0.0.1/
+        jgnet listintfs jigsaw://127.0.0.1/
         jgnet start netconfig.js
         jgnet stop netconfig.js
 `);
@@ -38,6 +41,24 @@ module.exports = {
 }
 `;
 
+async function listintfs(){
+    let registry = cli.input[1] || "jigsaw://127.0.0.1/"
+
+    let jg = RPC.GetJigsaw({registry});
+    await new Promise((resolve)=>jg.once("ready",resolve));
+
+    console.log(await jg.send("jigsaw-net.helper:listIntfs"));
+    await jg.close();    
+}
+async function listnodes(){
+    let registry = cli.input[1] || "jigsaw://127.0.0.1/"
+
+    let jg = RPC.GetJigsaw({registry});
+    await new Promise((resolve)=>jg.once("ready",resolve));
+
+    console.log(await jg.send("jigsaw-net.helper:listNodes"));
+    await jg.close();  
+}
 switch(cli.input[0]){
     case "start":{
         assert(cli.input[1]);
@@ -131,6 +152,16 @@ switch(cli.input[0]){
         });
         break;
     }
+    case "listintfs":{
+        
+        listintfs();
+        break;
+    }
+    case "listnodes":{
+
+        listnodes();
+        break;
+    }
     case "init":{
         fs.writeFileSync("./netconfig.js",template);
         break;
@@ -139,3 +170,4 @@ switch(cli.input[0]){
         cli.showHelp()
 
 }
+

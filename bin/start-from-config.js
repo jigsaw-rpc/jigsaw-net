@@ -30,8 +30,3 @@ for(let intf of config.interfaces){
     helper.getInterfaceManager().getNewInterface(intf.name,intf.entry,intf.to_registry,intf.to_netname,intf.to_interface);
 }
 
-
-setInterval(()=>{
-    console.log(helper.getHelperService().listInterfacesInfo());
-
-},2000)
