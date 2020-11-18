@@ -7,14 +7,14 @@ const {RPC} = require("jigsaw-rpc");
 
 const cli = meow(`
     Usage:
-        jgnet <start|stop|init|listintf|list|ls> <args>
+        jgnet <start|stop|init|listintf|listnodes|list|ls> <args>
 
         jgnet init
         jgnet list
         jgnet listnodes jigsaw://127.0.0.1/
         jgnet listintfs jigsaw://127.0.0.1/
         jgnet start netconfig.js
-        jgnet stop netconfig.js
+        jgnet stop MyNetA
 `);
 
 

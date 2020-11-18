@@ -61,7 +61,7 @@ class NetHelperService{
             }
         }
         map(treeobj,"|--");
-        
+
         return strs.join("\n");
     }
     getInterfacesInfo(){
@@ -100,6 +100,10 @@ class NetHelperService{
             }
 
         });
+
+        ret.unshift("");
+        ret.unshift(this.config_server.getConfig().netname);
+
         return ret.join("\n");
     }
     async close(){

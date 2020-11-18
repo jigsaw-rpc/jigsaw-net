@@ -27,7 +27,7 @@ class NetConfigServer{
         this.jigsaw.on("error",()=>{
             
         });
-        
+
         this.config.netname = netname;
         this.config.routes = default_routes || [];
 
@@ -44,6 +44,9 @@ class NetConfigServer{
         })
 
         this.start_loop();
+    }
+    getConfig(){
+        return this.config;
     }
     getRegistryURL(){
         return this.registry_url;
