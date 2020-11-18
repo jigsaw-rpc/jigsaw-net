@@ -1,4 +1,5 @@
 const {NetHelper} = require("../dist/api");
+
 const assert = require("assert");
 const meow = require("meow");
 const path = require("path");
@@ -26,6 +27,11 @@ for(let intf of config.interfaces){
 let helper = new NetHelper(config.netname,config.routes);
 
 for(let intf of config.interfaces){
-    helper.getNewInterface(intf.name,intf.entry,intf.to_registry,intf.to_netname,intf.to_interface);
+    helper.getInterfaceManager().getNewInterface(intf.name,intf.entry,intf.to_registry,intf.to_netname,intf.to_interface);
 }
 
+
+setInterval(()=>{
+    console.log(helper.getHelperService().listInterfacesInfo());
+
+},2000)

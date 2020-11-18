@@ -1,36 +1,11 @@
 import {RPC, RPCSpi} from "jigsaw-rpc";
 import Config from "./Config";
-import Util from "util";
-import DomainServer from "jigsaw-rpc/dist/network/domain/server/jigsaw/RegistryServer";
+import InterfaceInfo from "./InterfaceInfo";
 import Defer from "../utils/Defer";
+
+import Util from "util";
+
 const sleep = Util.promisify(setTimeout);
-
-class InterfaceInfo{
-    private left_life : number;
-    private intf_name :string = "";
-    private from_domain : string="";
-
-    constructor(intf_name:string){
-        this.intf_name = intf_name;
-        this.left_life = 10;
-
-    }
-    isExpired(){
-        return this.left_life <= 0;
-    }
-    countdown(){
-        this.left_life -- ;
-    }
-    updateInfo(from_domain:string){
-        this.from_domain = from_domain;
-
-        this.left_life = 10;
-    }
-    getInfo(){
-        return {intf_name:this.intf_name,from_domain:this.from_domain};
-    }
-
-}
 
 class NetConfigServer{
     private jigsaw : RPCSpi.jigsaw.IJigsaw;
@@ -43,10 +18,16 @@ class NetConfigServer{
     private interfaces = new Map<string,InterfaceInfo>();
     private closing_defer = new Defer<void>();
     private loop = false;
+    private registry_url : string;
 
     constructor(registry:string,netname:string,default_routes?: Array<Array<string>>){        
-        this.jigsaw = RPC.GetJigsaw({registry,name:"jigsaw-net.config"});
+        this.registry_url = registry;
 
+        this.jigsaw = RPC.GetJigsaw({registry:this.registry_url,name:"jigsaw-net.config"});
+        this.jigsaw.on("error",()=>{
+            
+        });
+        
         this.config.netname = netname;
         this.config.routes = default_routes || [];
 
@@ -64,11 +45,18 @@ class NetConfigServer{
 
         this.start_loop();
     }
-    
+    getRegistryURL(){
+        return this.registry_url;
+    }
+    getInterfaces(){
+        return this.interfaces;
+    }
     private getInterface(from_domain:string,intf_name:string){
         let key = `${from_domain}-${intf_name}`
         if(!this.interfaces.has(key)){
-            this.interfaces.set(key,new InterfaceInfo(intf_name));
+            let info = new InterfaceInfo(intf_name);
+            info.updateInfo(from_domain);
+            this.interfaces.set(key,info);
         }
 
         return this.interfaces.get(key) as InterfaceInfo;

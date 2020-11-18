@@ -9,14 +9,15 @@ import NetConfigClient from "../net-config/NetConfigClient";
 import LifeCycle from "../utils/LifeCycle";
 import Middleware from "../Middleware";
 import Defer from "../utils/Defer";
+import Direction from "./Direction";
 
 import Util from "util";
 const sleep = Util.promisify(setTimeout);
 
 class NetInterface{
+
     private conn? : Connection;
     private accessor = new Accessor();
-
 
     private domain : string = "";
     private name : string;
@@ -61,8 +62,34 @@ class NetInterface{
         this.lifeCycle.setState("starting");
 
     }
+    getName(){
+        return this.name;
+    }
     getLifeCycle(){
         return this.lifeCycle;
+    }
+    getDirection() : Direction{
+        if(this.hasConnection() && this.getConnection().isConnected() && !this.accessor.getCanReply()){
+            return Direction.OUT;
+        }else if(!this.hasConnection() && this.accessor.getCanReply()){
+            return Direction.IN;
+        }else{
+            return Direction.UNKNOWN;
+        }
+    }
+    getAccessor(){
+        assert(this.accessor.getCanReply());
+
+        return this.accessor;
+    }
+    hasConnection(){
+        return this.conn ? true : false;
+    }
+    getConnection():Connection{
+        if(!this.hasConnection())
+            throw new Error("right now don't connect to any interface");
+
+        return this.conn as Connection;
     }
     private connect(to_regserver:string,to_domain:string,to_name:string){
         assert.strictEqual(this.getLifeCycle().getState() , "ready");
@@ -73,7 +100,7 @@ class NetInterface{
         this.conn = new Connection(this.jigsaw,to_domain,to_regserver,to_name);
         this.conn.setDomainName(this.config_client.getConfig().netname);
     }
-    async start_loop(){
+    private async start_loop(){
         if(this.loop)
             throw new Error("this loop has already started");
 

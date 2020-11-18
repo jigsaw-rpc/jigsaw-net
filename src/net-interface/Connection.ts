@@ -13,9 +13,13 @@ class Connection{
     private loop : boolean = false;
     private closing_defer = new Defer<void>();
     private to_domain :string;
+    private connected : boolean = false;
     constructor(connector: RPCSpi.jigsaw.IJigsaw,to_domain:string,to_regserver:string,jgname:string){
     
         this.invoker = RPC.GetJigsaw({registry:to_regserver});
+        this.invoker.on("error",()=>{
+            
+        });
         this.connector = connector;
         this.jgname = jgname;
         this.to_domain = to_domain;
@@ -32,6 +36,9 @@ class Connection{
     }
     getInvoker(){
         return this.invoker;
+    }
+    isConnected(){
+        return this.connected;
     }
 
     async start(){
@@ -67,7 +74,8 @@ class Connection{
             jgname:this.jgname,
         };
 
-        let ret = await this.connector.call(new RPCSpi.network.Path(this.jgname,"connect"),new AddrRoute(target.addr),data);
+        await this.connector.call(new RPCSpi.network.Path(this.jgname,"connect"),new AddrRoute(target.address),data);
+        this.connected = true;
     }
     
 }

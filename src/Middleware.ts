@@ -10,6 +10,10 @@ class Middleware{
     private jg : RPCSpi.jigsaw.IJigsaw;
     constructor(jgoption:any){
         this.jg = RPC.GetJigsaw(jgoption);
+        this.jg.on("error",()=>{
+
+        });
+        
         this.config_client = new NetConfigClient(this.jg);
     }
     getConfigClient(){
