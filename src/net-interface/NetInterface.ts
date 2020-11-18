@@ -222,7 +222,7 @@ class NetInterface{
     }
 
     private async onConnect(data:any,ctx:any){
-        this.accessor.update(data.jgname,data.from_domain,ctx.reply_info);
+        this.accessor.update(data.jgname,data.from_domain,data.from_intf,ctx.reply_info);
 
         return {ok:true};
     }

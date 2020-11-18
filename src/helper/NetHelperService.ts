@@ -4,7 +4,7 @@ import InterfaceInfo from "../net-config/InterfaceInfo";
 import InterfaceManager from "./InterfaceManager";
 import Direction from "../net-interface/Direction";
 
-type IntfInfo = {intf_name:string,from_domain:string,to_domain:string,type:Direction};
+type IntfInfo = {intf_name:string,from:{domain:string,intf:string},to:{domain:string,intf:string},type:Direction};
 
 class NetHelperService{
     private jigsaw : RPCSpi.jigsaw.IJigsaw;
@@ -72,12 +72,15 @@ class NetHelperService{
             
             let name = net_intf.getName();
             let direction = net_intf.getDirection();
-            let obj = {intf_name:name,from_domain:"",to_domain:"",type:direction};
+            let obj = {intf_name:name,from:{domain:"",intf:""},to:{domain:"",intf:""},type:direction};
 
                 if(direction == Direction.IN){
-                    obj.from_domain = net_intf.getAccessor().getFromDomain();
-                }else if(direction == Direction.OUT)
-                    obj.to_domain = net_intf.getConnection().getTargetDomainName();
+                    obj.from.domain = net_intf.getAccessor().getFromDomain();
+                    obj.from.intf = net_intf.getAccessor().getFromInterfaceName();
+                }else if(direction == Direction.OUT){
+                    obj.to.domain = net_intf.getConnection().getTargetDomainName();
+                    obj.to.intf = net_intf.getConnection().getTargetInterfaceName();
+                }
 
             ret.push(obj);
         })
@@ -91,11 +94,15 @@ class NetHelperService{
         intfs.forEach((v)=>{
             let part_name = v.intf_name;
 
-            if(v.type == Direction.IN)
-                ret.push(`<${part_name}> <- [ ${v.from_domain.padEnd(6)} ]`);
-            else if(v.type == Direction.OUT)
-                ret.push(`<${part_name}> -> [ ${v.to_domain.padEnd(6)} ]`);
-            else{
+            if(v.type == Direction.IN){
+                let str = `${v.from.domain} : ${v.from.intf}`;
+                ret.push(`<${part_name}> <- [ ${str.padEnd(6)} ]`);
+            }
+            else if(v.type == Direction.OUT){
+                let str = `${v.to.domain} : ${v.to.intf}`;
+                ret.push(`<${part_name}> -> [ ${str.padEnd(6)} ]`);
+    
+            }else{
                 ret.push(`<${part_name}> ?  [ ${"".padEnd(6)} ]`);
             }
 

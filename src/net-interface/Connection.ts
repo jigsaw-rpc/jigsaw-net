@@ -70,6 +70,7 @@ class Connection{
         let target = await this.invoker.getRegistryClient().resolve(this.jgname);
 
         let data = {
+            from_intf:this.connector.getName(),
             from_domain:this.domain_name,
             jgname:this.jgname,
         };

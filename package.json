@@ -1,6 +1,6 @@
 {
   "name": "jigsaw-net",
-  "version": "0.0.1-dev16",
+  "version": "0.0.1-dev18",
   "description": "jigsaw-net is a set of components make jigsaws intercommunicating",
   "main": "dist/api/index.js",
   "typings": "dist/api/index.d.ts",
