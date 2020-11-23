@@ -1,3 +1,6 @@
+import {RPCSpi} from "jigsaw-rpc"
+
+
 class DomainPath{
     public domain:string;
     public regpath:string;
@@ -8,16 +11,16 @@ class DomainPath{
         this.method = method;
     }
     static parse(str:string){
-        let index = str.indexOf("/");
+        let path = RPCSpi.network.Path.fromString(str);
+        
+
+        let index = path.regpath.indexOf("/");
         if(index == -1)
             throw new Error("can find the /");
 
-        let domain_str = str.substr(0,index);
-        let left_str = str.substring(index+1,str.length);
-        
-        let m_index = left_str.lastIndexOf(":");
-        let regpath_str = left_str.substr(0,m_index);
-        let method_str = left_str.substring(m_index+1,left_str.length);
+        let domain_str = path.regpath.substr(0,index);
+        let regpath_str = path.regpath.substring(index+1,path.regpath.length);
+        let method_str = path.method;
 
         return new DomainPath(domain_str,regpath_str,method_str);
     }
