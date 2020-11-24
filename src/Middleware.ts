@@ -42,7 +42,6 @@ class Middleware{
         try{
             let path = DomainPath.parse(ctx.pathstr);
 
-
             let config = this.config_client.getConfig();
             let routes = this.config_client.getConfigRoutes();
             let context = {handled : false,ctx,path,config,routes};

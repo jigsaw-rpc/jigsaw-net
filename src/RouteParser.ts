@@ -1,4 +1,5 @@
 import assert from "assert";
+import matcher from "matcher";
 
 class RouteParser{
     private route_rule : Array<string>;
@@ -9,7 +10,8 @@ class RouteParser{
         this.route_rule = route_rule;
     }
     isMatched(){
-        return this.route_rule[0] == this.domain;
+//        return this.route_rule[0] == this.domain;
+        return matcher.isMatch(this.domain,this.route_rule[0],{caseSensitive:true});
     }
     getRegpath(){
         assert(this.isMatched());

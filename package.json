@@ -1,6 +1,6 @@
 {
   "name": "jigsaw-net",
-  "version": "0.0.2-dev3",
+  "version": "0.0.2-dev4",
   "description": "jigsaw-net is a set of components make jigsaws intercommunicating",
   "main": "dist/api/index.js",
   "typings": "dist/api/index.d.ts",
@@ -42,7 +42,8 @@
     }
   },
   "dependencies": {
-    "jigsaw-rpc": "0.0.7-dev7",
+    "jigsaw-rpc": "0.0.7-dev8",
+    "matcher": "^3.0.0",
     "meow": "^8.0.0",
     "pm2": "^4.5.0",
     "tiny-typed-emitter": "^2.0.3"
