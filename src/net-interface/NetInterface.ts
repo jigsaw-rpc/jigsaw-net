@@ -12,6 +12,7 @@ import Defer from "../utils/Defer";
 import Direction from "./Direction";
 
 import Util from "util";
+import RoutingPacket from "../packet/RoutingPacket";
 const sleep = Util.promisify(setTimeout);
 
 class NetInterface{
@@ -161,24 +162,33 @@ class NetInterface{
         return this.config_client.getConfig();
     }
     private async onRouteRequest(data:any){
-        let path = DomainPath.parse(data.dst);
+        
+        if(!(data instanceof Buffer))
+            return;
+        
+        let routing_packet = new RoutingPacket();
+        routing_packet.setBuffer(data);
+        routing_packet.decode();
+
+        
+        let path = DomainPath.parse(routing_packet.dst_pathstr);
         let config = this.getConfig();
         if(path.domain == config.netname){
-            let ret = await this.sendToInside(path,data);
+            let ret = await this.sendToInside(routing_packet);
             return ret;
         }
         
         if(!this.conn && this.accessor.getCanReply()){
-            if(data.from_domain == this.accessor.getFromDomain()){
-                return await this.continueRoute(data);
+            if(routing_packet.from_domain == this.accessor.getFromDomain()){
+                return await this.continueRoute(routing_packet);
             }
 
             return await this.sendToAccessor(data);
         }
 
         if(this.conn && !this.accessor.getCanReply()){
-            if(data.from_domain == this.conn.getTargetDomainName()){
-                return await this.continueRoute(data);
+            if(routing_packet.from_domain == this.conn.getTargetDomainName()){
+                return await this.continueRoute(routing_packet);
             }
 
             return await this.sendToConnection(data);
@@ -188,6 +198,16 @@ class NetInterface{
 
 
     }
+    private continueRoute(routing_packet:RoutingPacket){
+
+        return this.jigsaw.send(routing_packet.dst_pathstr,this.getPayload(routing_packet));
+    }
+    private getPayload(routing_packet:RoutingPacket){
+        let payload = routing_packet.isJSON ? 
+        JSON.parse(routing_packet.payload.toString()) : 
+        routing_packet.payload;
+        return payload;
+    }
     private async sendToAccessor(data:any){
 
         let result = await this.jigsaw.call(new RPCSpi.network.Path("path","route"),new AddrRoute(
@@ -195,8 +215,9 @@ class NetInterface{
         ),data);
         return result;
     }
-    private async sendToInside(path:DomainPath,data:any){
-        let result = await this.jigsaw.send(`${path.regpath}:${path.method}`,this.handlePayload(data));   
+    private async sendToInside(routing_packet:RoutingPacket){
+        let path = DomainPath.parse(routing_packet.dst_pathstr);
+        let result = await this.jigsaw.send(`${path.regpath}:${path.method}`,this.getPayload(routing_packet));   
         return result;
     }
     private async sendToConnection(data:any){
@@ -206,19 +227,6 @@ class NetInterface{
             throw new Error("not this connection");
 
         return await this.conn.getInvoker().send(`${this.conn.getTargetInterfaceName()}:route`,data);
-    }
-    private async continueRoute(data:any){
-        let payload = this.handlePayload(data);
-        return await this.jigsaw.send(data.dst,payload);
-    }
-    private handlePayload(data:any){
-        let ret : Buffer | Object;
-        if(data.isBuffer){
-            ret = Buffer.from(data.payload,"base64")
-        }else{
-            ret = data.payload;
-        }
-        return ret;
     }
 
     private async onConnect(data:any,ctx:any){

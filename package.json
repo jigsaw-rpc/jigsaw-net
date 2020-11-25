@@ -1,6 +1,6 @@
 {
   "name": "jigsaw-net",
-  "version": "0.0.2-dev5",
+  "version": "0.0.2-dev6",
   "description": "jigsaw-net is a set of components make jigsaws intercommunicating",
   "main": "dist/api/index.js",
   "typings": "dist/api/index.d.ts",
@@ -34,7 +34,7 @@
     "mocha": "^8.2.0",
     "nyc": "^15.1.0",
     "ts-node": "^9.0.0",
-    "typescript": "^4.0.3"
+    "typescript": "^4.1.2"
   },
   "config": {
     "commitizen": {
