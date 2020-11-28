@@ -9,6 +9,10 @@ import Defer from "../utils/Defer";
 
 const sleep = Util.promisify(setTimeout);
 
+type InterfaceInfoReport = {
+    intf_name:string,
+    from_domain:string
+}
 
 class NetConfigClient{
     private loop = false;
@@ -58,7 +62,7 @@ class NetConfigClient{
             this.closing_defer.resolve();
         }
     }
-    reportInterfaceInfo(intf_info:any){
+    reportInterfaceInfo(intf_info:InterfaceInfoReport){
         return this.jigsaw.send("jigsaw-net.config:report",intf_info);
     }
     async close(){
@@ -72,7 +76,7 @@ class NetConfigClient{
     }
     private async syncConfig(){
         let ret = await this.jigsaw.send("jigsaw-net.config:getConfig",{name:this.jigsaw.getName()});
-        this.config = ret as any;
+        this.config = ret;
 
         if(this.lifeCycle.getState()=="starting")
             this.lifeCycle.setState("ready");

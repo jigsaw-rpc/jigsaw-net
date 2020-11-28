@@ -1,3 +1,4 @@
+import ConnectRequest from "../net-interface/ConnectRequest";
 import NetInterface from "../net-interface/NetInterface";
 
 class InterfaceManager{
@@ -10,7 +11,7 @@ class InterfaceManager{
         return this.interfaces;
     }
     getNewInterface(name:string,entry:string,to_registry?:string,to_domain?:string,to_name?:string){
-        let default_connect_to : any = undefined;
+        let default_connect_to : ConnectRequest | undefined = undefined;
         if(to_registry && to_domain && to_name)
             default_connect_to = {registry:to_registry,domain:to_domain,name:to_name};
 

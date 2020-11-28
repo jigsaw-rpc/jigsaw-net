@@ -3,13 +3,21 @@ import {RPC, RPCSpi} from "jigsaw-rpc";
 import DomainPath from "./net-interface/DomainPath";
 import RouteParser from "./RouteParser";
 import RoutingPacket from "./packet/RoutingPacket";
+import Config from "./net-config/Config";
 
+type RouteContext = {
+    handled : boolean,
+    ctx:RPCSpi.jigsaw.context.PreContext,
+    path:DomainPath,
+    config:Config,
+    routes:Array<Array<string>>   
+}
 class RouteError extends Error{};
 
 class Middleware{
     private config_client;
     private jg : RPCSpi.jigsaw.IJigsaw;
-    constructor(jgoption:any){
+    constructor(jgoption:RPCSpi.jigsaw.option.JigsawOption){
         this.jg = RPC.GetJigsaw(jgoption);
         this.jg.on("error",()=>{
 
@@ -26,15 +34,14 @@ class Middleware{
     getLifeCycle(){
         return this.config_client.getLifeCycle();
     }
-    handle(){
+    handle() : RPCSpi.jigsaw.ware.PreWare{
         return this.process.bind(this);
     }
     async close(){
         await this.config_client.close();
         await this.jg.close();
     }
-    private async process(ctx:any,next:any){
-
+    private async process(ctx:RPCSpi.jigsaw.context.PreContext,next:RPCSpi.jigsaw.ware.NextFunction){
 
         await next();
 
@@ -44,9 +51,9 @@ class Middleware{
         try{
             let path = DomainPath.parse(ctx.pathstr);
 
-            let config = this.config_client.getConfig();
+            let config = this.config_client.getConfig();``
             let routes = this.config_client.getConfigRoutes();
-            let context = {handled : false,ctx,path,config,routes};
+            let context : RouteContext = {handled : false,ctx,path,config,routes};
 
             this.handleSelfRoute(context);
             this.handleRoutes(context);
@@ -66,22 +73,22 @@ class Middleware{
         
     }
 
-    private handleRoutes(context:any){
+    private handleRoutes(context:RouteContext){
 
         for(let route of context.routes){
             let parser = new RouteParser(context.path.domain,route);
             if(parser.isMatched()){
 
                 let regpath = parser.getRegpath();
-                let payload = context.ctx.raw.data;
+                let payload = context.ctx.rawdata;
                 let isJSON = !(payload instanceof Buffer);
                 if(isJSON)
-                    payload = Buffer.from(JSON.stringify(context.ctx.raw.data));
+                    payload = Buffer.from(JSON.stringify(context.ctx.rawdata));
                 
-
+                
                 let routing_packet = new RoutingPacket();
                 
-                routing_packet.dst_pathstr = context.ctx.raw.pathstr;
+                routing_packet.dst_pathstr = context.ctx.rawpathstr;
                 routing_packet.from_domain = context.config.netname;
                 routing_packet.payload = payload;
                 routing_packet.isJSON = isJSON;
@@ -100,7 +107,7 @@ class Middleware{
         }
 
     }
-    private handleSelfRoute(context:any){
+    private handleSelfRoute(context:RouteContext){
         let config = this.config_client.getConfig();
         if(context.path.domain == config.netname){ // self domain
             context.ctx.route = new RPCSpi.network.RegistryRoute(context.path.regpath,this.jg.getRegistryClient());

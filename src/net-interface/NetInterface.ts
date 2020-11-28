@@ -10,7 +10,7 @@ import LifeCycle from "../utils/LifeCycle";
 import Middleware from "../Middleware";
 import Defer from "../utils/Defer";
 import Direction from "./Direction";
-
+import ConnectRequest from "./ConnectRequest";
 import Util from "util";
 import RoutingPacket from "../packet/RoutingPacket";
 const sleep = Util.promisify(setTimeout);
@@ -32,7 +32,7 @@ class NetInterface{
     private lifeCycle = new LifeCycle();
     private jigsaw : RPCSpi.jigsaw.IJigsaw;
 
-    constructor(jgoption:any,default_connect_to?:any){
+    constructor(jgoption:RPCSpi.jigsaw.option.JigsawOption,default_connect_to?:ConnectRequest){
         
         this.middle_ware = new Middleware(jgoption);
         this.middle_ware.getLifeCycle().when("ready").then(async ()=>{
