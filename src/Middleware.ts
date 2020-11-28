@@ -17,7 +17,7 @@ class RouteError extends Error{};
 class Middleware{
     private config_client;
     private jg : RPCSpi.jigsaw.IJigsaw;
-    constructor(jgoption:RPCSpi.jigsaw.option.JigsawOption){
+    constructor(jgoption?:RPCSpi.jigsaw.option.JigsawOption){
         this.jg = RPC.GetJigsaw(jgoption);
         this.jg.on("error",()=>{
 
