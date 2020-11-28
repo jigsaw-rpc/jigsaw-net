@@ -34,7 +34,9 @@ class NetInterface{
 
     constructor(jgoption:RPCSpi.jigsaw.option.JigsawOption,default_connect_to?:ConnectRequest){
         
-        this.middle_ware = new Middleware(jgoption);
+        this.jigsaw = RPC.GetJigsaw(jgoption);
+
+        this.middle_ware = new Middleware(this.jigsaw);
         this.middle_ware.getLifeCycle().when("ready").then(async ()=>{
             this.setRef(+1);
             this.start_loop();
@@ -44,8 +46,6 @@ class NetInterface{
             this.setRef(-1);
         });
 
-
-        this.jigsaw = this.middle_ware.getJigsaw();
         
         this.config_client = this.middle_ware.getConfigClient();
 

@@ -10,7 +10,8 @@ describe("Base Tests",()=>{
     it("should be closable",async function(){
         this.timeout(40*1000);
 
-        let nethook = Middleware.create("jigsaw://127.0.0.1:1000/");
+        let jg = RPC.GetJigsaw({registry:"jigsaw://127.0.0.1:1000/"});
+        let nethook = new Middleware(jg);
         
         let helperA = new NetHelper("testNetA",undefined,1000);
         helperA.getInterfaceManager().getNewInterface("intf","127.0.0.1");
@@ -37,6 +38,7 @@ describe("Base Tests",()=>{
         await invoker.close();
         await helperA.close();
         await helperB.close();
+        await jg.close();
     })
 
 })

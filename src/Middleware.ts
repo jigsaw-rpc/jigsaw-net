@@ -4,6 +4,8 @@ import DomainPath from "./net-interface/DomainPath";
 import RouteParser from "./RouteParser";
 import RoutingPacket from "./packet/RoutingPacket";
 import Config from "./net-config/Config";
+import LifeCycle from "./utils/LifeCycle";
+
 
 type RouteContext = {
     handled : boolean,
@@ -17,29 +19,32 @@ class RouteError extends Error{};
 class Middleware{
     private config_client;
     private jg : RPCSpi.jigsaw.IJigsaw;
-    constructor(jgoption?:RPCSpi.jigsaw.option.JigsawOption){
-        this.jg = RPC.GetJigsaw(jgoption);
-        this.jg.on("error",()=>{
+    private ref : number = 0 ;
 
-        });
-        
+    constructor(jigsaw : RPCSpi.jigsaw.IJigsaw){
+        this.jg = jigsaw;
+
         this.config_client = new NetConfigClient(this.jg);
-    }
-    getConfigClient(){
-        return this.config_client;
-    }
-    getJigsaw(){
-        return this.jg;
+        this.setRef(+1);
+
     }
     getLifeCycle(){
         return this.config_client.getLifeCycle();
+    }
+    setRef(offset:number){
+        this.ref += offset;
+    }
+    getConfigClient(){
+        return this.config_client;
     }
     handle() : RPCSpi.jigsaw.ware.PreWare{
         return this.process.bind(this);
     }
     async close(){
+        
         await this.config_client.close();
-        await this.jg.close();
+        this.setRef(-1);
+
     }
     private async process(ctx:RPCSpi.jigsaw.context.PreContext,next:RPCSpi.jigsaw.ware.NextFunction){
 
@@ -51,7 +56,7 @@ class Middleware{
         try{
             let path = DomainPath.parse(ctx.pathstr);
 
-            let config = this.config_client.getConfig();``
+            let config = this.config_client.getConfig();
             let routes = this.config_client.getConfigRoutes();
             let context : RouteContext = {handled : false,ctx,path,config,routes};
 
@@ -116,10 +121,6 @@ class Middleware{
             throw new Error("this domain is inside");            
         }
 
-    }
-    static create(registry:string){
-        let mdw = new Middleware({registry});
-        return mdw;
     }
 
 }
