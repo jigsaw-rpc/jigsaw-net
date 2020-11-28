@@ -42,7 +42,7 @@
     }
   },
   "dependencies": {
-    "jigsaw-rpc": "0.0.7-dev26",
+    "jigsaw-rpc": "0.0.7-dev27",
     "matcher": "^3.0.0",
     "meow": "^8.0.0",
     "pm2": "^4.5.0",
